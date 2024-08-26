@@ -1,0 +1,39 @@
+* {
+    margin: 0;
+    padding: 0;    
+}
+
+body {
+    background-color: #302E2B;
+}
+.sprite-sheet {
+    display: none;
+}
+
+#chessboard {
+    margin-left: 10px;
+    margin-top: 73px;
+}
+
+#flip-board-icon {
+    height: 40px;
+    width: 45px;
+    padding: 6px;
+    padding-bottom: 4px;
+    padding-top: 8px;
+    pointer-events: none;
+}
+
+#flip-board-button {
+    all: unset;
+    position: absolute;
+    bottom: 5px;    
+    left: 750px;
+    transition: background-color .05s;
+    user-select: none;
+}
+
+#flip-board-button:hover {
+    background-color: #21201E;
+}
+
