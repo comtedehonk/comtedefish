@@ -770,7 +770,7 @@ export let currentPosition = new Position([
     4, 2, 3, 5, 6, 0, 0, 4
 ], [true, true, false, false], null, "w");
 
-/* original position:
+/*
 10,8, 9, 11,12,9, 8, 10,
 7, 7, 7, 7, 7, 7, 7, 7,
 0, 0, 0, 0, 0, 0, 0, 0,
