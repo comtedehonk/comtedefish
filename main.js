@@ -1,6 +1,6 @@
 const chessboard = document.getElementById("chessboard");
 const ctx = chessboard.getContext("2d");
-import {drawBoard} from "./chessboard2.js"
+import {drawBoard} from "./chessboard.js"
 import {currentPosition} from "./comtedefish.js"
 
 
