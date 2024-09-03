@@ -1,20 +1,22 @@
 import { Position } from "./comtedefish.js"
 let currentPosition = new Position([
-    10,8, 9, 11,0,12, 0, 10,
-    7, 7, 0, 1, 9, 7, 7, 7,
-    0, 0, 7, 0, 0, 0, 0, 0,
+    10,8, 9, 11,12,9, 8, 10,
+    7, 7, 7, 7, 7, 7, 7, 7,
     0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 3, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 2, 8, 1, 1,
-    4, 2, 3, 5, 6, 0, 0, 4
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    4, 2, 3, 5, 6, 3, 2, 4
 ], [true, true, false, false], null, "w");
 const pieceSprites = document.getElementById("piece-sprites");
 const pieces = [0, [pieceSprites, 5 * 45, 0, 45, 45], [pieceSprites, 3 * 45, 0, 45, 45], [pieceSprites, 2 * 45, 0, 45, 45], [pieceSprites, 4 * 45, 0, 45, 45], [pieceSprites, 1 * 45, 0, 45, 45],
 [pieceSprites, 0 * 45, 0, 45, 45], [pieceSprites, 5 * 45, 45, 45, 45], [pieceSprites, 3 * 45, 45, 45, 45], [pieceSprites, 2 * 45, 45, 45, 45], [pieceSprites, 4 * 45, 45, 45, 45],
 [pieceSprites, 1 * 45, 45, 45, 45], [pieceSprites, 0 * 45, 45, 45, 45]];
 let boardSquares = [];
-let boardSize = 800;
+let boardSize = innerHeight - 73;
+chessboard.height = boardSize;
+chessboard.width = boardSize;
 let squareSize = boardSize / 8;
 let mouseX = 0;
 let mouseY = 0;
@@ -28,8 +30,8 @@ let legalMovesOverlay = {
 // whiteyellow #FAFB34
 chessboard.addEventListener("mousemove", (e) => {
     const rect = chessboard.getBoundingClientRect();
-    mouseX = e.pageX - rect.left;
-    mouseY = e.pageY - rect.top;    
+    mouseX = e.pageX - 10;
+    mouseY = e.pageY - 20;    
 })
 
 class Square {

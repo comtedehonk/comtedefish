@@ -587,8 +587,19 @@ export class Position {
             }
             // generate king moves
             {
-                let directions = [8, -8, 1, -1, 9, -9, 7, -7];
+                let directions;
                 let kingPos = this.friendlyPieces.king;
+                switch (edges[kingPos]){
+                    case 0:
+                        directions = [8, -8, 1, 9, -7];
+                        break;
+                    case 3:
+                        directions = [8, -8, -1, -9, 7];
+                        break;
+                    default:
+                        directions = [8, -8, 1, -1, 9, -9, 7, -7];
+                        break;
+                }
                 for (let i of directions){
                     if (oppControlledSquares[kingPos + i] === null && (this.currentBoard[kingPos + i] === 0 || this.isEnemy(this.currentBoard[kingPos + i]))){
                         legalMoves.push([kingPos, kingPos + i])
@@ -730,8 +741,19 @@ export class Position {
                 generateSlidingMovesInCheck(i, [8, -8, 1, -1, 9, -9, 7, -7]);
             }
             { // king
-                let directions = [8, -8, 1, -1, 9, -9, 7, -7];
-                let kingPos = this.friendlyPieces.king;                
+                let directions;
+                let kingPos = this.friendlyPieces.king;
+                switch (edges[kingPos]){
+                    case 0:
+                        directions = [8, -8, 1, 9, -7];
+                        break;
+                    case 3:
+                        directions = [8, -8, -1, -9, 7];
+                        break;
+                    default:
+                        directions = [8, -8, 1, -1, 9, -9, 7, -7];
+                        break;
+                }                
                 for (let i of directions){
                     let newKingPos = kingPos + i;
                     if (oppControlledSquares[newKingPos] === null && (this.currentBoard[newKingPos] === 0 || this.isEnemy(this.currentBoard[newKingPos]))){
@@ -742,8 +764,19 @@ export class Position {
             
         } else { // generate moves while double checked
             { // king
-                let directions = [8, -8, 1, -1, 9, -9, 7, -7];
-                let kingPos = this.friendlyPieces.king;                
+                let directions;
+                let kingPos = this.friendlyPieces.king;
+                switch (edges[kingPos]){
+                    case 0:
+                        directions = [8, -8, 1, 9, -7];
+                        break;
+                    case 3:
+                        directions = [8, -8, -1, -9, 7];
+                        break;
+                    default:
+                        directions = [8, -8, 1, -1, 9, -9, 7, -7];
+                        break;
+                }                 
                 for (let i of directions){
                     let newKingPos = kingPos + i;
                     if (oppControlledSquares[newKingPos] === null && (this.currentBoard[newKingPos] === 0 || this.isEnemy(this.currentBoard[newKingPos]))){
@@ -759,16 +792,16 @@ export class Position {
 }
 
 
-export let currentPosition = new Position([
-    10,8, 9, 11,0,12, 0, 10,
-    7, 7, 0, 1, 9, 7, 7, 7,
-    0, 0, 7, 0, 0, 0, 0, 0,
+export let currentPosition = new Position(new Uint8Array([
+    10,8, 9, 11,12,9, 8, 10,
+    7, 7, 7, 7, 7, 7, 7, 7,
     0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 3, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 2, 8, 1, 1,
-    4, 2, 3, 5, 6, 0, 0, 4
-], [true, true, false, false], null, "w");
+    0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0, 0,
+    1, 1, 1, 1, 1, 1, 1, 1,
+    4, 2, 3, 5, 6, 3, 2, 4 
+]), [true, true, false, false], null, "w");
 
 /* original position:
 10,8, 9, 11,12,9, 8, 10,
@@ -779,6 +812,15 @@ export let currentPosition = new Position([
 0, 0, 0, 0, 0, 0, 0, 0,
 1, 1, 1, 1, 1, 1, 1, 1,
 4, 2, 3, 5, 6, 3, 2, 4 
+
+10,8, 9, 11,0,12, 0, 10,
+7, 7, 0, 1, 9, 7, 7, 7,
+0, 0, 7, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 3, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0,
+1, 1, 1, 0, 2, 8, 1, 1,
+4, 2, 3, 5, 6, 0, 0, 4
 */
 
 
@@ -797,5 +839,5 @@ function search(position, depth){
     }       
 }
 
-search(currentPosition, 2);
+search(currentPosition, 3);
 console.log(positionsEvaluated);
