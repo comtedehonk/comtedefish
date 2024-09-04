@@ -12,8 +12,8 @@ const edges = [
     ];
 
 const piece = {
-    white: 1, 
-    black: 2, 
+    white: 0, 
+    black: 1, 
     pawn: 4,  
     knight: 8,
     bishop: 16,
@@ -23,19 +23,19 @@ const piece = {
 }
 
 
-class BitBoard {
+class BitBoard extends BigUint64Array{
     constructor(){
-        this.int = new BigUint64Array(64);
+        super(1)
     }
     holds(index){
-        return Boolean((this.int[0] >>> BigInt(index)) & 1)
+        return Boolean((this[0] >>> BigInt(index)) & 1)
     }
     setBit(index){
         let num = 1n << BigInt(index);
-        this.int[0] = this.int[0] | num;
+        this[0] = this[0] | num;
     }
     forEachBit(func){
-        let num = this.int[0];
+        let num = this[0];
         while (num !== 0n){
             func(index);
             num &= (num - 1n);
@@ -43,15 +43,6 @@ class BitBoard {
     }
 }
 
-class Square {
-    constructor(piece){
-        this.piece = piece;
-        this.pinned;
-        this.block;
-        this.EPblock;
-        this.controlled;
-    }
-}
 export class Position {
     constructor(currentBoard, castleRights, enPassantSquare, toMove, pieces){
         this.board = currentBoard;
