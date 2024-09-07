@@ -12,8 +12,8 @@ const edges = [
     ];
 
 const piece = {
-    white: 0, 
-    black: 1, 
+    white: 1, 
+    black: 2, 
     pawn: 4,  
     knight: 8,
     bishop: 16,
@@ -43,6 +43,36 @@ class BitBoard extends BigUint64Array{
     }
 }
 
+class Move {
+    constructor(square1, square2){
+        this.square1 = square1;
+        this.square2 = square2;
+    }
+}
+
+class PromotionMove extends Move {
+    constructor(square1, square2, promotionPiece){
+        super(square1, square2);
+        this.promotionPiece = promotionPiece;
+    }
+}
+
+class legalMovesList extends Array {
+    addPawnMove(homeSquare, finalSquare, friendly){
+        if (finalSquare < 8 || finalSquare > 55){
+            this.push(new PromotionMove(homeSquare, finalSquare, friendly | piece.knight));
+            this.push(new PromotionMove(homeSquare, finalSquare, friendly | piece.bishop));
+            this.push(new PromotionMove(homeSquare, finalSquare, friendly | piece.rook));
+            this.push(new PromotionMove(homeSquare, finalSquare, friendly | piece.queen));
+        } else {
+            this.push(new Move(homeSquare, finalSquare));
+        }
+    }
+    addMove(homeSquare, finalSquare){
+        this.push(new Move(homeSquare, finalSquare))
+    }
+}
+
 export class Position {
     constructor(currentBoard, castleRights, enPassantSquare, toMove, pieces){
         this.board = currentBoard;
@@ -58,7 +88,7 @@ export class Position {
 
 
     calculateLegalMoves(){
-        let legalMoves = [];
+        let legalMoves = new legalMovesList();
         let inCheck = false;
         let inDoubleCheck = false;
         let oppControlledSquares = new BitBoard();
@@ -66,6 +96,7 @@ export class Position {
         let enPassantBlockSquare = null;
         let pinnedPieces = new Int8Array(64);
         let friend, enemy;
+        const pawnDirections =  (this.toMove = "1") ? [-8, -16, -7, -9, 8, 16, 9, 7] : [8, 16, 9, 7, -8, -16, -7, -9];
         if (this.toMove === 1){
             friend = 1;
             enemy = 2;
@@ -80,9 +111,9 @@ export class Position {
                 } else {
                     inCheck = true;
                     blockSquares.setBit(homeSquare);
-                    let squareOffset = (this.toMove = "w") ? 8 : -8;
-                    if (this.enPassantSquare = homeSquare - squareOffset){
-                        enPassantBlockSquare = homeSquare - squareOffset;
+                    let squareOffset = pawnDirections[0];
+                    if (this.enPassantSquare = homeSquare + squareOffset){
+                        enPassantBlockSquare = homeSquare + squareOffset;
                     }
                 }
             } else {
@@ -150,15 +181,14 @@ export class Position {
 
         for (let i = 0; i < 64; i++){ // generate opponent controlled squares
             switch (this.board[i] ^ enemy){
-                case piece.pawn: {
-                    let directions = (this.toMove === "2") ? [i - 7, i - 9] : [i + 9, i + 7];                    
+                case piece.pawn: {                   
                     if (edges[i] === 0){
-                        addPawnControlledSquare(directions[0], i);
+                        addPawnControlledSquare(pawnDirections[6], i);
                     } else if (edges[i] === 3){
-                        addPawnControlledSquare(directions[1], i);
+                        addPawnControlledSquare(pawnDirections[7], i);
                     } else {
-                        addPawnControlledSquare(directions[0], i);
-                        addPawnControlledSquare(directions[1], i);
+                        addPawnControlledSquare(pawnDirections[6], i);
+                        addPawnControlledSquare(pawnDirections[7], i);
                     }
                     break;
                 } case piece.knight: {
@@ -249,8 +279,45 @@ export class Position {
             }
         } 
 
-        let checkingPieceIndex = oppControlledSquares[this.friendlyPieces.king];
+        const generatePawnMoves = (index) => {
 
+            if (pinnedPieces[index]){
+                
+                let direction = (this.toMove === 1) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index])
+                switch (direction){
+                    case pawnDirections[0]:
+                        if (this.board[index + pawnDirections[0]] === 0){
+                            legalMoves.addPawnMove(index, index + pawnDirections[0], friend)
+                            if (this.board[index + pawnDirections[1]] === 0){
+        
+                            }
+                        }
+                        break;
+                    case pawnDirections[2]:
+                        break;
+                    case pawnDirections[3]:
+                        break;
+                }
+            } else {
+                if (edges[index] !== 0){
+                    if (this.board[index + pawnDirections[3]] & enemy){
+                        legalMoves.addPawnMove(index, index + pawnDirections[2], friend);                       
+                    }
+                }
+                if (edges[index] !== 3){
+                    if (this.board[index + pawnDirections[2]] & enemy){
+                        legalMoves.addPawnMove(index, index + pawnDirections[3], friend)
+                    }
+                }
+                if (this.board[index + pawnDirections[0]] === 0){
+                    legalMoves.addPawnMove(index, index + pawnDirections[0], friend)
+                    if (this.board[index + pawnDirections[1]] === 0){
+
+                    }
+                }
+                
+            }
+        }
         if (!inCheck) { // generate moves while not in check
             for (let i = 0; i < 64; i++){
                 switch(this.board[i] ^ friend){
