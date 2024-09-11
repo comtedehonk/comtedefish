@@ -74,7 +74,7 @@ class legalMovesList extends Array {
 }
 
 export class Position {
-    constructor(currentBoard, castleRights, enPassantSquare, toMove, pieces){
+    constructor(currentBoard, castleRights, enPassantSquare, toMove){
         this.board = currentBoard;
         this.castleRights = castleRights;  // white kingside, white queenside, black kingside, black queenside
         this.enPassantSquare = enPassantSquare;
@@ -85,9 +85,21 @@ export class Position {
         }
     }
     
-
+    onSecondRank(index){
+        if (this.toMove === 1){
+            if (index > 47 && index < 56){
+                return true;
+            }
+        } else {
+            if (index > 7 && index < 16){
+                return true;
+            }
+        }
+        return false;
+    }
 
     calculateLegalMoves(){
+        // initialize
         let legalMoves = new legalMovesList();
         let inCheck = false;
         let inDoubleCheck = false;
@@ -95,15 +107,27 @@ export class Position {
         let blockSquares = new BitBoard();
         let enPassantBlockSquare = null;
         let pinnedPieces = new Int8Array(64);
-        let friend, enemy;
-        const pawnDirections =  (this.toMove = "1") ? [-8, -16, -7, -9, 8, 16, 9, 7] : [8, 16, 9, 7, -8, -16, -7, -9];
+        // var declarations :(
         if (this.toMove === 1){
-            friend = 1;
-            enemy = 2;
+            var friend = 1;
+            var enemy = 2;
+            var pawnDirections = [-8, -16, -7, -9, 8, 16, 9, 7];
+            var onSecondRank = (index) => {
+                if (index > 47 && index < 56){
+                    return true;
+                }
+            }
         } else {
-            friend = 2;
-            enemy = 1;
+            var friend = 2;
+            var enemy = 1;
+            var pawnDirections = [8, 16, 9, 7, -8, -16, -7, -9];
+            var onSecondRank = (index) => {
+                if (index > 7 && index < 16){
+                    return true;
+                }
+            }
         }
+        
         const addPawnControlledSquare = (square, homeSquare) => {
             if (this.board[square] === (friend | piece.king)){
                 if (inCheck){
@@ -138,9 +162,9 @@ export class Position {
                         break;                                                
                 }
                 
-                while (edges[currentSquare] !== edge){
+                while (edges[currentSquare] !== edge){                    
                     if (this.board[currentSquare + i] === 0){
-                        oppControlledSquares.setBit(currentSquare + i)
+                        oppControlledSquares.setBit(currentSquare + i);
                         currentSquare += i;   
                     } else if (this.board[currentSquare + i] & friend){
                         if (this.board[currentSquare + i] & piece.king){
@@ -281,48 +305,82 @@ export class Position {
 
         const generatePawnMoves = (index) => {
 
-            if (pinnedPieces[index]){
-                
-                let direction = (this.toMove === 1) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index])
+            if (pinnedPieces[index]){ 
+
+                let direction = (this.toMove === 2) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index])
                 switch (direction){
                     case pawnDirections[0]:
                         if (this.board[index + pawnDirections[0]] === 0){
                             legalMoves.addPawnMove(index, index + pawnDirections[0], friend)
-                            if (this.board[index + pawnDirections[1]] === 0){
-        
+                            if (this.board[index + pawnDirections[1]] === 0 && onSecondRank(index)){
+                                legalMoves.push(index, index + pawnDirections[1]);
                             }
                         }
                         break;
                     case pawnDirections[2]:
+                        if (edges[index] !== 3){
+                            if (this.board[index + pawnDirections[2]] & enemy){
+                                legalMoves.addPawnMove(index, index + pawnDirections[2], friend)
+                            }
+                        }
                         break;
                     case pawnDirections[3]:
+                        if (edges[index] !== 0){
+                            if (this.board[index + pawnDirections[3]] & enemy){
+                                legalMoves.addPawnMove(index, index + pawnDirections[3], friend);                       
+                            }
+                        }
                         break;
                 }
+
             } else {
+
                 if (edges[index] !== 0){
                     if (this.board[index + pawnDirections[3]] & enemy){
-                        legalMoves.addPawnMove(index, index + pawnDirections[2], friend);                       
+                        legalMoves.addPawnMove(index, index + pawnDirections[3], friend);                       
                     }
                 }
                 if (edges[index] !== 3){
                     if (this.board[index + pawnDirections[2]] & enemy){
-                        legalMoves.addPawnMove(index, index + pawnDirections[3], friend)
-                    }
+                        legalMoves.addPawnMove(index, index + pawnDirections[2], friend)
+                    } 
                 }
                 if (this.board[index + pawnDirections[0]] === 0){
                     legalMoves.addPawnMove(index, index + pawnDirections[0], friend)
-                    if (this.board[index + pawnDirections[1]] === 0){
-
+                    if (this.board[index + pawnDirections[1]] === 0 && onSecondRank(index)){
+                        legalMoves.addMove(index, index + pawnDirections[1])
                     }
                 }
                 
+            }
+        }
+
+        const generateKnightMoves = (index) => {
+            let validMoves;
+            switch (edges[index]){
+                case null:
+                    validMoves = [index-15, index-6, index+10, index+17, index-17, index+15, index-10, index+6];
+                case 0:
+                    validMoves = [index-15, index-6, index+10, index+17];
+                case 1:
+                    validMoves = [index-15, index-6, index+10, index+17, index-17, index+15];
+                case 2:
+                    validMoves = [index-15, index+17, index-17, index+15, index-10, index+6];
+                case 3:
+                    validMoves = [index-17, index+15, index-10, index+6];
+            }
+
+            for (let i of validMoves) {
+                if (this.board[i] === 0 || (this.board[i] & enemy)){
+                    legalMoves.addMove(index, i);
+                }
             }
         }
         if (!inCheck) { // generate moves while not in check
             for (let i = 0; i < 64; i++){
                 switch(this.board[i] ^ friend){
                     case piece.pawn: {
-
+                        generatePawnMoves(index);
                     } case piece.knight: {
                         
                     } case piece.bishop: {
