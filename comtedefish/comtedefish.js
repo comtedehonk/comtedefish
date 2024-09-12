@@ -1,61 +1,7 @@
 
-
-const edges = [
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3,
-    0, 1, null, null, null, null, 2 ,3
-    ];
-
-const piece = {
-    white: 1, 
-    black: 2, 
-    pawn: 4,  
-    knight: 8,
-    bishop: 16,
-    rook: 32,  
-    queen: 64, 
-    king: 128  
-}
-
-
-class BitBoard extends BigUint64Array{
-    constructor(){
-        super(1)
-    }
-    holds(index){
-        return Boolean((this[0] >>> BigInt(index)) & 1)
-    }
-    setBit(index){
-        let num = 1n << BigInt(index);
-        this[0] = this[0] | num;
-    }
-    forEachBit(func){
-        let num = this[0];
-        while (num !== 0n){
-            func(index);
-            num &= (num - 1n);
-        }
-    }
-}
-
-class Move {
-    constructor(square1, square2){
-        this.square1 = square1;
-        this.square2 = square2;
-    }
-}
-
-class PromotionMove extends Move {
-    constructor(square1, square2, promotionPiece){
-        super(square1, square2);
-        this.promotionPiece = promotionPiece;
-    }
-}
+import colorState from "./colorstate.js"
+import BitBoard from "./bitboard.js";
+import {Move, PromotionMove} from "./move.js"
 
 class legalMovesList extends Array {
     addPawnMove(homeSquare, finalSquare, friendly){
@@ -78,25 +24,10 @@ export class Position {
         this.board = currentBoard;
         this.castleRights = castleRights;  // white kingside, white queenside, black kingside, black queenside
         this.enPassantSquare = enPassantSquare;
-        this.toMove = toMove;       
+        this.moveState = (toMove === 1) ? colorState.white : colorState.black;  
         this.legalMoves = this.calculateLegalMoves();
-        {
-            
-        }
     }
     
-    onSecondRank(index){
-        if (this.toMove === 1){
-            if (index > 47 && index < 56){
-                return true;
-            }
-        } else {
-            if (index > 7 && index < 16){
-                return true;
-            }
-        }
-        return false;
-    }
 
     calculateLegalMoves(){
         // initialize
@@ -107,26 +38,6 @@ export class Position {
         let blockSquares = new BitBoard();
         let enPassantBlockSquare = null;
         let pinnedPieces = new Int8Array(64);
-        // var declarations :(
-        if (this.toMove === 1){
-            var friend = 1;
-            var enemy = 2;
-            var pawnDirections = [-8, -16, -7, -9, 8, 16, 9, 7];
-            var onSecondRank = (index) => {
-                if (index > 47 && index < 56){
-                    return true;
-                }
-            }
-        } else {
-            var friend = 2;
-            var enemy = 1;
-            var pawnDirections = [8, 16, 9, 7, -8, -16, -7, -9];
-            var onSecondRank = (index) => {
-                if (index > 7 && index < 16){
-                    return true;
-                }
-            }
-        }
         
         const addPawnControlledSquare = (square, homeSquare) => {
             if (this.board[square] === (friend | piece.king)){
@@ -307,7 +218,7 @@ export class Position {
 
             if (pinnedPieces[index]){ 
 
-                let direction = (this.toMove === 2) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index])
+                let direction = (this.moveState.toMove === 2) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index])
                 switch (direction){
                     case pawnDirections[0]:
                         if (this.board[index + pawnDirections[0]] === 0){
@@ -409,7 +320,7 @@ export class Position {
                     }
                 }
                 if (pinned === false){
-                    let directions = (this.toMove === "w") ? [i - 8, i - 16, i - 7, i - 9] : [i + 8, i + 16, i + 9, i + 7];
+                    let directions = (this.moveState.toMove === "w") ? [i - 8, i - 16, i - 7, i - 9] : [i + 8, i + 16, i + 9, i + 7];
                     if (this.currentBoard[directions[0]] === 0){
                         if (this.currentBoard[directions[1]] === 0 && this.onSecondRank(i)) {
                             legalMoves.push([i, directions[1]]); 
@@ -465,9 +376,9 @@ export class Position {
                     }
                 } else {
                     
-                    if (pinnedDirection < 0 && this.toMove === "b"){
+                    if (pinnedDirection < 0 && this.moveState.toMove === "b"){
                         pinnedDirection = -pinnedDirection;
-                    } else if (pinnedDirection > 0 && this.toMove === "w"){
+                    } else if (pinnedDirection > 0 && this.moveState.toMove === "w"){
                         pinnedDirection = -pinnedDirection;
                     }
                     
@@ -552,7 +463,7 @@ export class Position {
                     }
                 }
             //castling
-                if (this.toMove = "w"){
+                if (this.moveState.toMove = "w"){
                     if (this.castleRights[0] === true){
                         if (this.currentBoard[61] === 0 && this.currentBoard[62] === 0 && 
                             oppControlledSquares[61] === null && oppControlledSquares[62] === null){
@@ -629,7 +540,7 @@ export class Position {
                     }
                 }
 
-                let directions = (this.toMove === "w") ? [i - 8, i - 16, i - 7, i - 9] : [i + 8, i + 16, i + 9, i + 7];                    
+                let directions = (this.moveState.toMove === "w") ? [i - 8, i - 16, i - 7, i - 9] : [i + 8, i + 16, i + 9, i + 7];                    
                 if (blockSquares[directions[0]] === 1 && this.currentBoard[directions[0]] === 0){
                     this.addPawnMove(legalMoves, i, directions[0]);
                 } else if (blockSquares[directions[1]] === 1 && this.currentBoard[directions[0]] === 0 && this.currentBoard[directions[1]] === 0 && this.onSecondRank(i)){
