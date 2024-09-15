@@ -1,7 +1,8 @@
-
+import {edges, piece} from "./constants.js"
 import colorState from "./colorstate.js"
 import BitBoard from "./bitboard.js";
 import {Move, PromotionMove} from "./move.js"
+import getControlledAndPinned from "./enemysquares.js";
 
 class legalMovesList extends Array {
     addPawnMove(homeSquare, finalSquare, friendly){
@@ -34,185 +35,12 @@ export class Position {
         let legalMoves = new legalMovesList();
         let inCheck = false;
         let inDoubleCheck = false;
-        let oppControlledSquares = new BitBoard();
-        let blockSquares = new BitBoard();
-        let enPassantBlockSquare = null;
-        let pinnedPieces = new Int8Array(64);
-        
-        const addPawnControlledSquare = (square, homeSquare) => {
-            if (this.board[square] === (friend | piece.king)){
-                if (inCheck){
-                    inDoubleCheck = true;
-                } else {
-                    inCheck = true;
-                    blockSquares.setBit(homeSquare);
-                    let squareOffset = pawnDirections[0];
-                    if (this.enPassantSquare = homeSquare + squareOffset){
-                        enPassantBlockSquare = homeSquare + squareOffset;
-                    }
-                }
-            } else {
-                oppControlledSquares.setBit(square);
-            }
-        }
+        let {checkStatus, blockSquares, enPassantBlockSquare, oppControlledSquares, pinnedPieces} = getControlledAndPinned(this);
 
-        const generateEnemySlidingMoves = (homeSquare, directions) => {
-            for (let i of directions){
-                let currentSquare = homeSquare;
-                let edge;
-                switch (i){ 
-                    case -9:
-                    case  7:
-                    case -1:
-                        edge = 0;
-                        break;
-                    case 1:
-                    case -7:
-                    case 9:
-                        edge = 3;
-                        break;                                                
-                }
-                
-                while (edges[currentSquare] !== edge){                    
-                    if (this.board[currentSquare + i] === 0){
-                        oppControlledSquares.setBit(currentSquare + i);
-                        currentSquare += i;   
-                    } else if (this.board[currentSquare + i] & friend){
-                        if (this.board[currentSquare + i] & piece.king){
-                            if (inCheck){
-                                inDoubleCheck = true;
-                            } else {
-                                inCheck = true;
-                                while (currentSquare !== homeSquare - i){
-                                    blockSquares.setBit(currentSquare);
-                                    currentSquare -= i;
-                                }
-                            }
-                            break;
-                        }
-                        oppControlledSquares.setBit(currentSquare + i);
-                        let potentialPinnedPiece = currentSquare + i;
-                        currentSquare += i;
-                        while (edges[currentSquare] !== edge){
-                            if (this.board[currentSquare + i] === 0){
-                                currentSquare += i;
-                            } else if (this.board[currentSquare + i] === (friend | piece.king)){ // find pinned pieces
-                                pinnedPieces[potentialPinnedPiece] = i;                    
-                                break;
-                            } else {
-                                break;
-                            }
-                        }
-                        break;
-                    } else if (this.board[currentSquare + i] & enemy){
-                        oppControlledSquares.setBit(currentSquare + i);
-                        break;
-                    } else {
-                        break;
-                    }                        
-                }
-            }
-        }
-
-        for (let i = 0; i < 64; i++){ // generate opponent controlled squares
-            switch (this.board[i] ^ enemy){
-                case piece.pawn: {                   
-                    if (edges[i] === 0){
-                        addPawnControlledSquare(pawnDirections[6], i);
-                    } else if (edges[i] === 3){
-                        addPawnControlledSquare(pawnDirections[7], i);
-                    } else {
-                        addPawnControlledSquare(pawnDirections[6], i);
-                        addPawnControlledSquare(pawnDirections[7], i);
-                    }
-                    break;
-                } case piece.knight: {
-                    let validMoves = [];
-                    switch (edges[i]){
-                        case null:
-                            validMoves.push(i-15, i-6, i+10, i+17, i-17, i+15, i-10, i+6);
-                        case 0:
-                            validMoves.push(i-15, i-6, i+10, i+17);
-                        case 1:
-                            validMoves.push(i-15, i-6, i+10, i+17, i-17, i+15);
-                        case 2:
-                            validMoves.push(i-15, i+17, i-17, i+15, i-10, i+6);
-                        case 3:
-                            validMoves.push(i-17, i+15, i-10, i+6);
-                    }
         
-                    for (let j of validMoves){
-                        if (this.board[j] !== undefined){
-                            oppControlledSquares.setBit(j);
-                            if (j === (friend | piece.king)){
-                                if (inCheck){
-                                    inDoubleCheck = true;
-                                } else {
-                                    inCheck = true;
-                                    blockSquares.setBit(i);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                } case piece.bishop: {
-                    generateEnemySlidingMoves(i, [-9, 7, -7, 9]);
-                    break;
-                } case piece.rook: {
-                    generateEnemySlidingMoves(i, [-8, 8, -1, 1]);
-                    break;
-                } case piece.queen: {
-                    generateEnemySlidingMoves(i, [-9, 7, -7, 9, -8, 8, -1, 1]); 
-                    break;
-                } case piece.king: {
-                    let validMoves;
-                    if (edges[i] === 0){
-                        validMoves = [i-8, i-7, i+1, i+9, i+8];
-                    } else if (edges[i] === 3){
-                        validMoves = [i-9, i-8, i+7, i+8, i-1];
-                    } else {
-                        validMoves = [i-9, i-8, i+7, i+8, i-1, i-7, i+9];
-                    }
-                    for (let j of validMoves){
-                        if (this.board[j] !== undefined){
-                            oppControlledSquares.setBit(j);
-                        }
-                    }
-                }
-            }
-        }
  
 
-        const generateSlidingMoves = (homeSquare, directions) => {
-            for (let i of directions){
-                let currentSquare = homeSquare;
-                let edge;
-                switch (i){ 
-                    case -9:
-                    case  7:
-                    case -1:
-                        edge = 0;
-                        break;
-                    case 1:
-                    case -7:
-                    case 9:
-                        edge = 3;
-                        break;                                            
-                }
-                
-                while (edges[currentSquare] !== edge){
-                    if (this.board[currentSquare + i] === 0){
-                        legalMoves.push([homeSquare, currentSquare + i]);
-                        currentSquare += i;   
-                    } else if (this.board[currentSquare + i] & enemy){
-                        legalMoves.push([homeSquare, currentSquare + i]);
-                        break;
-                    } else {
-                        break;
-                    }                        
-                }
-            }
-        } 
+         
 
         const generatePawnMoves = (index) => {
 
