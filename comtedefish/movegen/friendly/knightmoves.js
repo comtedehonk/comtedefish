@@ -1,4 +1,4 @@
-import {edges} from "../constants.js"
+import {edges} from "../../constants.js"
 export default function generateKnightMoves(index, position){
     let validMoves;
     let enemy = position.moveState.enemy;

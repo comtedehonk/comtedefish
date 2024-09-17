@@ -1,4 +1,4 @@
-import {edges} from "../constants.js"
+import {edges} from "../../constants.js"
 export default function generatePawnMoves(index, position, pinnedPieces, legalMoves){
     let pawnMoves = position.moveState.pawnMoves;
     let friend = position.moveState.friend;

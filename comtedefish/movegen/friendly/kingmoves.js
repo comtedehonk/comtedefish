@@ -1,4 +1,4 @@
-import {edges} from "../constants.js"
+import {edges} from "../../constants.js"
 export default function generateKingMoves(index, position, legalMoves, oppControlledSquares, enemy){
     let validMoves;
     if (edges[index] === 0){

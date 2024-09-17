@@ -37,7 +37,7 @@ export class Position {
                         break;
                     } case piece.knight: {
                         if (pinnedPieces[i] === 0){
-                            generateKnightMoves(i, this, legalMoves)
+                            generateKnightMoves(i, this, legalMoves);
                         }
                         break;
                     } case piece.bishop: {
@@ -50,13 +50,37 @@ export class Position {
                         generateSlidingMoves(i, [9, -9, 7, -7, 1, -8, -1, 8], this, legalMoves, pinnedPieces);
                         break;
                     } case piece.king: {
-                        generateKingMoves(i, this, legalMoves, oppControlledSquares, enemy)
+                        generateKingMoves(i, this, legalMoves, oppControlledSquares, enemy);
                         break;
                     }                                            
                 }
             }
         } else if (checkStatus === 1){ // generate moves when checked once
-
+            for (let i = 0; i < 64; i++){
+                switch (this.board[i] ^ friend){
+                    case piece.pawn: {
+                        generatePawnMoves(index);
+                        break;
+                    } case piece.knight: {
+                        if (pinnedPieces[i] === 0){
+                            generateKnightMoves(i, this, legalMoves);
+                        }
+                        break;
+                    } case piece.bishop: {
+                        generateSlidingMoves(i, [9, -9, 7, -7], this, legalMoves, pinnedPieces);
+                        break;
+                    } case piece.rook: {
+                        generateSlidingMoves(i, [1, -8, -1, 8], this, legalMoves, pinnedPieces);
+                        break;
+                    } case piece.queen: {
+                        generateSlidingMoves(i, [9, -9, 7, -7, 1, -8, -1, 8], this, legalMoves, pinnedPieces);
+                        break;
+                    } case piece.king: {
+                        generateKingMoves(i, this, legalMoves, oppControlledSquares, enemy);
+                        break;
+                    }                                            
+                }
+            }
         } else {
 
         }

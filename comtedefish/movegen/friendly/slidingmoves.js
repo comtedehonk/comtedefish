@@ -1,4 +1,4 @@
-import {edges} from "../constants.js"
+import {edges} from "../../constants.js"
 export default function generateSlidingMoves(homeSquare, directions, position, legalMoves, pinnedPieces) {
     let moveDirections;
     if (pinnedPieces[homeSquare]){
