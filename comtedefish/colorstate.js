@@ -1,5 +1,5 @@
 export default {
-    white: {
+    w: {
         friend: 1,
         enemy: 2,
         pawnMoves: [-8, -16, -7, -9], // forward, 2 forward, 1 right, 1 left
@@ -11,7 +11,7 @@ export default {
         }
     },
 
-    black: {
+    b: {
         friend: 2,
         enemy: 1,
         pawnMoves: [-8, -16, -7, -9], // forward, 2 forward, 1 right, 1 left
