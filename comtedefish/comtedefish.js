@@ -59,7 +59,7 @@ export class Position {
             for (let i = 0; i < 64; i++){
                 switch (this.board[i] ^ friend){
                     case piece.pawn: {
-                        generatePawnMovesInCheck(index);
+                        generatePawnMovesInCheck(index, this, pinnedPieces, legalMoves, blockSquares, friend, enemy);
                         break;
                     } case piece.knight: {
                         if (pinnedPieces[i] === 0){
