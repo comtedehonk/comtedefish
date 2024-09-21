@@ -1,8 +1,6 @@
 import {edges} from "../../constants.js"
-export default function generatePawnMoves(index, position, pinnedPieces, legalMoves){
+export default function generatePawnMoves(index, position, pinnedPieces, legalMoves, friend, enemy){
     let pawnMoves = position.moveState.pawnMoves;
-    let friend = position.moveState.friend;
-    let enemy = position.moveState.enemy;
     if (pinnedPieces[index]){ 
 
         let direction = (friend === 2) ? Math.abs(pinnedPieces[index]) : -Math.abs(pinnedPieces[index]);

@@ -1,5 +1,5 @@
 import {edges} from "../../constants.js"
-export default function generateKnightMoves(index, position, legalMoves, enemy){
+export default function generateKnightMovesInCheck(index, legalMoves, blockSquares){
     let validMoves;
     switch (edges[index]){
         case null:
@@ -20,7 +20,7 @@ export default function generateKnightMoves(index, position, legalMoves, enemy){
     }
 
     for (let i of validMoves) {
-        if (position.board[i] === 0 || (position.board[i] & enemy)){
+        if (blockSquares.holds(i)){
             legalMoves.addMove(index, i);
         }
     }
