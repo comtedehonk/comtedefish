@@ -9,19 +9,23 @@ import generateKingMoves from "./movegen/friendly/kingmoves.js";
 import generateSlidingMovesInCheck from "./movegen/incheck/slidingmovesincheck.js";
 import generateKnightMovesInCheck from "./movegen/incheck/knightmovesincheck.js";
 import generatePawnMovesInCheck from "./movegen/incheck/pawnmovesincheck.js";
+import originalPosition from "./constants.js";
 export class Position {
-    constructor(currentBoard, castleRights, enPassantSquare, toMove){
+    constructor(currentBoard, state){
         this.board = currentBoard;
-        this.castleRights = castleRights;  // white kingside, white queenside, black kingside, black queenside
-        this.enPassantSquare = enPassantSquare;
-        this.moveState = colorState[toMove];
+        this.state = state;
+        /*
+        state: last 4 bits: castle rights
+        next 6 bits: en passant square
+        next 1 bit: side to move
+        next 6 bits: half-move counter
+        
+        */
         this.legalMoves = this.calculateLegalMoves();
     }
     
 
-
     calculateLegalMoves(){
-        // initialize
         let legalMoves = new LegalMovesList();
         let inCheck = false;
         let inDoubleCheck = false;
@@ -87,20 +91,40 @@ export class Position {
         return(legalMoves);
     }
 
+    makeMove(move){
+    /**
+
+    Move - Last 6 bits: final square
+    next 6: original square
+    next 8: promotion piece
+
+    */
+        let newBoard = new Uint8Array(this.board);
+        let newState = this.state;
+        let homeSquare = move & 0b111111000000;
+        let finalSquare = move & 0b111111;
+        if (this.board[homeSquare] | piece.pawn){
+            let promotionPiece = move & 0b11111111000000000000;
+            if (promotionPiece > 0){
+                newBoard[finalSquare] = promotionPiece
+            } else {
+
+            }
+        } else if (this.board[homeSquare] | piece.king){
+
+        } else if (this.board[homeSquare] | piece.rook){
+
+        } else {
+
+        }
+        
+        
+    }
     
 }
 
 
-export let currentPosition = new Position(new Uint8Array([
-    10,8, 9, 11,0,12, 0, 10,
-    7, 7, 0, 1, 9, 7, 7, 7,
-    0, 0, 7, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 3, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0, 0,
-    1, 1, 1, 0, 2, 8, 1, 1,
-    4, 2, 3, 5, 6, 0, 0, 4
-]), [true, true, false, false], null, "w");
+export let currentPosition = new Position(new Uint8Array(originalPosition), [true, true, false, false], null, "w");
 
 /* original position:
  
