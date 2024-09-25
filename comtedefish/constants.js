@@ -14,14 +14,16 @@ export const piece = {
     Piece representation in byte array, each type = 1 bit
     8 different types = one byte
     */
-    white: 1, 
-    black: 2, 
+    
     pawn: 4,  
     knight: 8,
     bishop: 16,
     rook: 32,  
     queen: 64, 
-    king: 128  
+    king: 128,
+
+    white: 1, 
+    black: 2 
 }
 
 export const originalPosition = [

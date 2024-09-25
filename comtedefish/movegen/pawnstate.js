@@ -1,5 +1,5 @@
-export default [
-    {
+export default [null,
+    { // white
         pawnMoves: [-8, -16, -7, -9], // forward, 2 forward, 1 right, 1 left
         enemyPawnMoves: [8, 16, 9, 7],
         onSecondRank: (index) => {
@@ -9,7 +9,7 @@ export default [
         }
     },
 
-    {
+    { // black
         pawnMoves: [-8, -16, -7, -9], // forward, 2 forward, 1 right, 1 left
         enemyPawnMoves: [8, 16, 9, 7],
         onSecondRank: (index) => {

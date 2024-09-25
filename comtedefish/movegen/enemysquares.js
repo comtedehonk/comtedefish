@@ -1,5 +1,5 @@
-import BitBoard from "./bitboard.js"
-import {edges, piece} from "./constants.js"
+import BitBoard from "../bitboard.js"
+import {edges, piece} from "../constants.js"
 export default function getControlledAndPinned(position){
     const pawnDirections = position.moveState.enemyPawnMoves;
     let state = {

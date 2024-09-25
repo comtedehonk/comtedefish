@@ -1,7 +1,8 @@
 import {edges, piece, originalPosition} from "./constants.js"
-import colorState from "./colorstate.js"
+// const {pawn: PAWN, knight: KNIGHT, bishop: BISHOP, rook: ROOK, queen: QUEEN, king: KING} = piece; future micro-optimisation
+import colorState from "./movegen/pawnstate.js"
 import {Move, PromotionMove, LegalMovesList} from "./move.js"
-import getControlledAndPinned from "./enemysquares.js";
+import getControlledAndPinned from "./movegen/enemysquares.js";
 import generateSlidingMoves from "./movegen/friendly/slidingmoves.js";
 import generatePawnMoves from "./movegen/friendly/pawnmoves.js";
 import generateKnightMoves from "./movegen/friendly/knightmoves.js";
@@ -29,22 +30,6 @@ export class Position {
         return (state & 1) + 1;
     }
 
-    get pawnMoves(){
-        return (this.friend === 1 ? [-8, -16, -7, -9] : [8, 16, 9, 7])
-    }    
-
-    get enemyPawnMoves(){
-        return (this.friend === 1 ? [8, 16, 9, 7] : [-8, -16, -7, -9])
-    }
-
-    onSecondRank(){
-        if (this.friend === 1){
-
-        } else {
-            
-        }
-    }
-
     calculateLegalMoves(){
         let legalMoves = new LegalMovesList();
         let {checkStatus, blockSquares, enPassantBlockSquare, oppControlledSquares, pinnedPieces} = getControlledAndPinned(this);  
@@ -63,13 +48,13 @@ export class Position {
                         }
                         break;
                     } case piece.bishop: {
-                        generateSlidingMoves(i, [9, -9, 7, -7], this, legalMoves, pinnedPieces);
+                        generateSlidingMoves(i, [9, -9, 7, -7], this, legalMoves, pinnedPieces, enemy);
                         break;
                     } case piece.rook: {
-                        generateSlidingMoves(i, [1, -8, -1, 8], this, legalMoves, pinnedPieces);
+                        generateSlidingMoves(i, [1, -8, -1, 8], this, legalMoves, pinnedPieces, enemy);
                         break;
                     } case piece.queen: {
-                        generateSlidingMoves(i, [9, -9, 7, -7, 1, -8, -1, 8], this, legalMoves, pinnedPieces);
+                        generateSlidingMoves(i, [9, -9, 7, -7, 1, -8, -1, 8], this, legalMoves, pinnedPieces, enemy);
                         break;
                     } case piece.king: {
                         generateKingMoves(i, this, legalMoves, oppControlledSquares, enemy);

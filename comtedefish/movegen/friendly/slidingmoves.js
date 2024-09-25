@@ -1,5 +1,5 @@
 import {edges} from "../../constants.js"
-export default function generateSlidingMoves(homeSquare, directions, position, legalMoves, pinnedPieces) {
+export default function generateSlidingMoves(homeSquare, directions, position, legalMoves, pinnedPieces, enemy) {
     let moveDirections;
     if (pinnedPieces[homeSquare]){
         if (directions.includes(pinnedPieces[homeSquare])){
