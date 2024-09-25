@@ -1,4 +1,4 @@
-import {edges, piece} from "./constants.js"
+import {edges, piece, originalPosition} from "./constants.js"
 import colorState from "./colorstate.js"
 import {Move, PromotionMove, LegalMovesList} from "./move.js"
 import getControlledAndPinned from "./enemysquares.js";
@@ -9,28 +9,46 @@ import generateKingMoves from "./movegen/friendly/kingmoves.js";
 import generateSlidingMovesInCheck from "./movegen/incheck/slidingmovesincheck.js";
 import generateKnightMovesInCheck from "./movegen/incheck/knightmovesincheck.js";
 import generatePawnMovesInCheck from "./movegen/incheck/pawnmovesincheck.js";
-import originalPosition from "./constants.js";
+
 export class Position {
     constructor(currentBoard, state){
         this.board = currentBoard;
         this.state = state;
         /*
-        state: last 4 bits: castle rights
+        last 1 bits: side to move (0 white, 1 black)
+        next 4 bits: castle rights (black queen, black king, white queen, white king)
         next 6 bits: en passant square
-        next 1 bit: side to move
-        next 6 bits: half-move counter
-        
+        next 6 bits: half-move counter        
         */
+        
+
         this.legalMoves = this.calculateLegalMoves();
     }
     
+    get friend(){
+        return (state & 1) + 1;
+    }
+
+    get pawnMoves(){
+        return (this.friend === 1 ? [-8, -16, -7, -9] : [8, 16, 9, 7])
+    }    
+
+    get enemyPawnMoves(){
+        return (this.friend === 1 ? [8, 16, 9, 7] : [-8, -16, -7, -9])
+    }
+
+    onSecondRank(){
+        if (this.friend === 1){
+
+        } else {
+            
+        }
+    }
 
     calculateLegalMoves(){
         let legalMoves = new LegalMovesList();
-        let inCheck = false;
-        let inDoubleCheck = false;
         let {checkStatus, blockSquares, enPassantBlockSquare, oppControlledSquares, pinnedPieces} = getControlledAndPinned(this);  
-        let friend = this.moveState.friend;
+        let friend = this.friend;
         let enemy = 3 ^ friend;
         
         if (checkStatus === 0) { // generate moves while not in check
@@ -101,18 +119,19 @@ export class Position {
     */
         let newBoard = new Uint8Array(this.board);
         let newState = this.state;
-        let homeSquare = move & 0b111111000000;
+        let homeSquare = (move & 0b111111000000) >>> 6;
         let finalSquare = move & 0b111111;
-        if (this.board[homeSquare] | piece.pawn){
+        if (this.board[homeSquare] & piece.pawn){
             let promotionPiece = move & 0b11111111000000000000;
             if (promotionPiece > 0){
-                newBoard[finalSquare] = promotionPiece
+                newBoard[finalSquare] = promotionPiece >>> 12;
             } else {
-
+                newBoard[finalSquare] = newBoard[homeSquare];
+                newBoard[homeSquare] = 0;
             }
-        } else if (this.board[homeSquare] | piece.king){
+        } else if (this.board[homeSquare] & piece.king){
 
-        } else if (this.board[homeSquare] | piece.rook){
+        } else if (this.board[homeSquare] & piece.rook){
 
         } else {
 
