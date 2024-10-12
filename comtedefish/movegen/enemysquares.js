@@ -1,7 +1,8 @@
 import BitBoard from "../bitboard.js"
 import {edges, piece} from "../constants.js"
-export default function getControlledAndPinned(position){
-    const pawnDirections = position.moveState.enemyPawnMoves;
+import pawnState from "./pawnstate.js"
+export default function getControlledAndPinned(position, friend, enemy){    
+    const pawnDirections = pawnState[friend].enemyPawnMoves;
     let state = {
         checkStatus: 0,
         blockSquares: new BitBoard(),
@@ -11,13 +12,13 @@ export default function getControlledAndPinned(position){
     }
 
     const addPawnControlledSquare = (square, homeSquare) => {
-        if (position.board[square] === (position.moveState.friend | piece.king)){
+        if (position.board[square] === (friend | piece.king)){
             if (state.checkStatus === 0){
                 state.checkStatus = 1;
                 state.blockSquares.setBit(homeSquare);
-                let squareOffset = pawnDirections[0];
-                if (position.enPassantSquare = homeSquare - squareOffset){
-                    state.enPassantBlockSquare = homeSquare - squareOffset;
+                let squareBehindPawn = homeSquare - pawnDirections[0]
+                if (position.enPassantSquare = squareBehindPawn){
+                    state.enPassantBlockSquare = squareBehindPawn;
                 }
             } else if (state.checkStatus === 1){
                 state.checkStatus = 2;
@@ -49,7 +50,7 @@ export default function getControlledAndPinned(position){
                     state.oppControlledSquares.setBit(currentSquare + i);
                     currentSquare += i;   
                 } else if (position.board[currentSquare + i] & friend){
-                    if (position.board[currentSquare + i] & piece.king){
+                    if (position.board[currentSquare + i] ^ friend === piece.king){
                         if (state.checkStatus === 0){
                             state.checkStatus = 1;
                             while (currentSquare !== homeSquare - i){
@@ -67,7 +68,7 @@ export default function getControlledAndPinned(position){
                     while (edges[currentSquare] !== edge){
                         if (position.board[currentSquare + i] === 0){
                             currentSquare += i;
-                        } else if (position.board[currentSquare + i] === (position.moveState.friend | piece.king)){ // find pinned pieces
+                        } else if (position.board[currentSquare + i] === (friend | piece.king)){ // find pinned pieces
                             state.pinnedPieces[potentialPinnedPiece] = i;                    
                             break;
                         } else {
@@ -75,7 +76,7 @@ export default function getControlledAndPinned(position){
                         }
                     }
                     break;
-                } else if (position.board[currentSquare + i] & position.moveState.enemy){
+                } else if (position.board[currentSquare + i] & enemy){
                     state.oppControlledSquares.setBit(currentSquare + i);
                     break;
                 } else {
@@ -86,21 +87,21 @@ export default function getControlledAndPinned(position){
     }
 
     for (let i = 0; i < 64; i++){ // generate opponent controlled squares
-        switch (position.board[i] ^ position.moveState.enemy){
+        switch (position.board[i] ^ enemy){
             case piece.pawn: {                   
                 if (edges[i] === 0){
-                    addPawnControlledSquare(pawnDirections[1], i);
+                    addPawnControlledSquare(i + pawnDirections[1], i);
                 } else if (edges[i] === 3){
-                    addPawnControlledSquare(pawnDirections[2], i);
+                    addPawnControlledSquare(i + pawnDirections[2], i);
                 } else {
-                    addPawnControlledSquare(pawnDirections[1], i);
-                    addPawnControlledSquare(pawnDirections[2], i);
+                    addPawnControlledSquare(i + pawnDirections[1], i);
+                    addPawnControlledSquare(i + pawnDirections[2], i);
                 }
                 break;
             } case piece.knight: {
                 let validMoves = [];
                 switch (edges[i]){
-                    case null:
+                    case 4:
                         validMoves.push(i-15, i-6, i+10, i+17, i-17, i+15, i-10, i+6);
                     case 0:
                         validMoves.push(i-15, i-6, i+10, i+17);
@@ -114,8 +115,8 @@ export default function getControlledAndPinned(position){
     
                 for (let j of validMoves){
                     if (position.board[j] !== undefined){
-                        oppControlledSquares.setBit(j);
-                        if (j === (position.moveState.friend | piece.king)){
+                        state.oppControlledSquares.setBit(j);
+                        if (j === (friend | piece.king)){
                             if (state.checkStatus === 0){
                                 state.checkStatus = 1;
                                 state.blockSquares.setBit(i);
@@ -149,6 +150,7 @@ export default function getControlledAndPinned(position){
                         state.oppControlledSquares.setBit(j);
                     }
                 }
+                break;
             }
         }
     }

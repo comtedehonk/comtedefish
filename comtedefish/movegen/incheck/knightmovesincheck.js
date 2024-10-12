@@ -2,7 +2,7 @@ import {edges} from "../../constants.js"
 export default function generateKnightMovesInCheck(index, legalMoves, blockSquares){
     let validMoves;
     switch (edges[index]){
-        case null:
+        case 4:
             validMoves = [index-15, index-6, index+10, index+17, index-17, index+15, index-10, index+6];
             break;
         case 0:

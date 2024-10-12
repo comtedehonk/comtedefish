@@ -1,6 +1,6 @@
 import {edges} from "../../constants.js"
 export default function generateSlidingMovesInCheck(homeSquare, directions, position, legalMoves, pinnedPieces, blockSquares) {
-    let enemy = position.moveState.enemy;
+    let enemy = position.friend ^ 3;
     if (pinnedPieces[homeSquare]){
         return;
     }

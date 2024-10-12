@@ -30,7 +30,7 @@ export default function generateSlidingMoves(homeSquare, directions, position, l
             if (position.board[currentSquare + i] === 0) {
                 legalMoves.addMove(homeSquare, currentSquare + i);
                 currentSquare += i;
-            } else if (position.board[currentSquare + i] & position.moveState.enemy) {
+            } else if (position.board[currentSquare + i] & enemy) {
                 legalMoves.addMove(homeSquare, currentSquare + i);
                 break;
             } else {

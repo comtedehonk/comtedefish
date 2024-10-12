@@ -1,11 +1,12 @@
-import {edges} from "../../constants.js"
+import {edges} from "../../constants.js";
+import pawnState from "../pawnstate.js";
 export default function generatePawnMovesInCheck(index, position, pinnedPieces, legalMoves, blockSquares, friend, enemy){
 
     if (pinnedPieces[index]){ 
         return;
     }    
     
-    let pawnMoves = position.moveState.pawnMoves.map(function(value){
+    let pawnMoves = pawnState[friend].pawnMoves.map(function(value){
         return value + index;
     });
 
@@ -27,7 +28,7 @@ export default function generatePawnMovesInCheck(index, position, pinnedPieces, 
     }
 
     if (blockSquares.holds(pawnMoves[1])){
-        if (position.board[pawnMoves[0]] === 0 && position.board[pawnMoves[1]] === 0 && position.moveState.onSecondRank(index)){
+        if (position.board[pawnMoves[0]] === 0 && position.board[pawnMoves[1]] === 0 && pawnState[friend].onSecondRank(index)){
             legalMoves.addMove(index, pawnMoves[1]);
         }
     }    
