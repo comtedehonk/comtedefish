@@ -239,5 +239,7 @@ function search(position, depth){
     }       
 }
 
-search(currentPosition, 1);
+console.time("find moves");
+search(currentPosition, 4);
+console.timeEnd("find moves");
 console.log(positionsEvaluated);

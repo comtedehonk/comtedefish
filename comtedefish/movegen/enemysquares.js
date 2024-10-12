@@ -8,7 +8,7 @@ export default function getControlledAndPinned(position, friend, enemy){
         blockSquares: new BitBoard(),
         enPassantBlockSquare: null,
         oppControlledSquares: new BitBoard(),
-        pinnedPieces: new Int8Array()
+        pinnedPieces: new Int8Array(64)
     }
 
     const addPawnControlledSquare = (square, homeSquare) => {
@@ -17,7 +17,7 @@ export default function getControlledAndPinned(position, friend, enemy){
                 state.checkStatus = 1;
                 state.blockSquares.setBit(homeSquare);
                 let squareBehindPawn = homeSquare - pawnDirections[0]
-                if (position.enPassantSquare = squareBehindPawn){
+                if (position.enPassantSquare === squareBehindPawn){
                     state.enPassantBlockSquare = squareBehindPawn;
                 }
             } else if (state.checkStatus === 1){
